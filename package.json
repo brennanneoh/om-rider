@@ -1,0 +1,21 @@
+{
+  "name": "om-rider",
+  "version": "0.0.1",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-downloadfile": "^0.3.2",
+    "lodash": "^4.13.1",
+    "moment-range": "^2.2.0"
+  },
+  "dependencies": {
+    "grunt-curl": "^2.2.0",
+    "moment": "^2.14.1"
+  }
+}
