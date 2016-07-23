@@ -1,0 +1,19 @@
+html
+  head
+    title OpsManager Rider
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.2/css/bootstrap.min.css')
+  body
+    .container-fluid
+      .header
+        h1 OpsManager Rider
+      table.table.table-striped
+        thead.thead-inverse
+          th Ride
+          th Distance
+          th Average Speed
+        tbody(data-bind='foreach: activitiesData')
+          tr
+            td(data-bind='text: name')
+            td(data-bind='text: distance')
+            td(data-bind='text: average_speed')
+  script(data-main='js/main.js' src='//cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.js')

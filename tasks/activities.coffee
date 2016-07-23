@@ -1,4 +1,5 @@
 _ = require 'lodash'
+jsonfile = require 'jsonfile'
 dataJson = require '../data/strava-brennanneoh.json'
 
 module.exports = (grunt) ->
@@ -21,4 +22,4 @@ module.exports = (grunt) ->
       'elev_high'
       'elev_low'
     ]
-  grunt.file.write 'build/activities.json'
+  grunt.file.write 'build/js/activities.json', JSON.stringify(selectedData)

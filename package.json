@@ -10,18 +10,21 @@
   "license": "ISC",
   "private": true,
   "repository": {
-      "type": "git",
-        "url": "https://github.com/brennanneoh/om-rider.git"
+    "type": "git",
+    "url": "https://github.com/brennanneoh/om-rider.git"
   },
   "devDependencies": {
     "dotenv": "^2.0.0",
     "grunt": "^1.0.1",
+    "grunt-contrib-connect": "^1.0.2",
     "grunt-contrib-pug": "^1.0.0",
+    "grunt-contrib-watch": "^1.0.0",
     "jsonfile": "^2.3.1",
     "lodash": "^4.13.1",
     "moment-range": "^2.2.0"
   },
   "dependencies": {
+    "grunt-contrib-coffee": "^1.0.0",
     "grunt-curl": "^2.2.0",
     "moment": "^2.14.1",
     "strava-v3": "^1.12.1"
