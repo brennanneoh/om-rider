@@ -2,18 +2,47 @@ html
   head
     title OpsManager Rider
     link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.2/css/bootstrap.min.css')
+    link(rel='stylesheet', href='https://api.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.css')
+    link(rel='stylesheet', href='css/main.css')
   body
     .container-fluid
       .header
         h1 OpsManager Rider
-      table.table.table-striped
-        thead.thead-inverse
-          th Ride
-          th Distance
-          th Average Speed
-        tbody(data-bind='foreach: activitiesData')
-          tr
-            td(data-bind='text: name')
-            td(data-bind='text: distance')
-            td(data-bind='text: average_speed')
+      .row
+        #map.col-md-4
+        .col-md-8
+          table#activities.table.table-striped
+            thead.thead-inverse
+              th
+                .sr-only Profile Picture
+              th Cyclist
+              th Date
+              th Time
+              th Distance
+              th Average Speed
+              th Maximum Speed
+            tbody(data-bind='foreach: activitiesData.pageItems')
+              tr
+                td
+                  img(data-bind='attr: { src: avatar_url }')
+                td(data-bind='text: athlete.username')
+                td(data-bind='text: date')
+                td(data-bind='text: time')
+                td(data-bind='text: distance_kilometer')
+                td(data-bind='text: average_speed')
+                td(data-bind='text: max_speed')
+          ul.pagination
+            li.page-item
+              a.page-link(href='#' aria-label='Previous' data-bind='click: activitiesData.toPreviousPage()')
+                span(aria-hidden=true) &laquo;
+                .sr-only Previous
+            // ko foreach: activitiesData.pages
+            li.page-item(data-bind='css: { active: $data == $root.activitiesData.pageNumber() }')
+              a.page-link(href='#' data-bind='text: $data, click: $parent.activitiesData.pageNumber')
+            // /ko
+            li.page-item
+              a.page-link(href='#' aria-label='Next' data-bind='click: activitiesData.toNextPage()')
+                span(aria-hidden=true) &raquo;
+                .sr-only Next
+
   script(data-main='js/main.js' src='//cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.js')
