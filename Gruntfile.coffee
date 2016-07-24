@@ -16,7 +16,7 @@ module.exports = (grunt) ->
     copy:
       main:
         files:
-          'build/js/polyline.js': 'node_modules/polyline/src/polyline.js'
+          'build/CNAME': 'src/CNAME'
     connect:
       server:
         options:

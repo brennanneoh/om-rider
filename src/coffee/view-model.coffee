@@ -1,12 +1,16 @@
-define 'viewModel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'knockout-paging'], ($, ko, _, moment, mapboxgl) ->
+define 'viewModel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'chartjs', 'randomcolor', 'knockout-paging'], ($, ko, _, moment, mapboxgl, Chart, randomColor) ->
   class viewModel
     constructor: () ->
       @activitiesData = ko.observableArray()
       @activitiesData.extend
         paged:
           pageSize: 15
-      @_loadData()
-      @_loadMap()
+      @totalDistanceGroupedByMonth = ko.pureComputed => @_totalDistanceByMonth()
+      @activitiesMonthYears = ko.pureComputed => @_activitiesMonthYears()
+
+      @_loadData().then =>
+        @_loadMap()
+        @_loadDistanceByMonthBarChart()
 
     _loadMap: ->
       mapboxgl.accessToken = 'pk.eyJ1IjoiYnJlbm5hbm5lb2giLCJhIjoiY2lyMDRjaXZrMDJweWZwbWd5d3JrNmR0MSJ9.Cek0zIm8OfVVY2pnyiRqVw'
@@ -40,7 +44,7 @@ define 'viewModel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'kno
 
     _loadData: ->
       json = $.ajax 'js/activities.json'
-      json.done (data) =>
+      json.then (data) =>
         for item in data
           item.avatar_url = "https://github.com/#{item.athlete.username}.png?size=20"
           item.date = moment(item.start_date).format 'MMMM Do'
@@ -51,24 +55,42 @@ define 'viewModel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'kno
           item.max_speed = @_formatSpeed(item.max_speed)
 
         data = _.orderBy data, ['start_date', 'start_date_local'], ['desc', 'desc']
-        data = _.filter data, (item) ->
+        @activitiesData _.filter data, (item) ->
           _.includes [1..5], moment(item.start_date_local).isoWeekday()
-        @activitiesData data
-        @_loadMonthDistanceSummary()
 
-    _loadMonthDistanceSummary: ->
-      activityMonths = _.map @activitiesData(), (data) ->
+    _loadDistanceByMonthBarChart: ->
+      backgroundColor = _.times _.size(@totalDistanceGroupedByMonth()), () -> randomColor()
+      distanceData = _.values @totalDistanceGroupedByMonth()
+      labels = @activitiesMonthYears()
+      data =
+        labels: labels
+        datasets: [
+          {
+            label: 'Total'
+            backgroundColor: backgroundColor
+            data: distanceData
+          }
+        ]
+      context = $('#distance-by-month')
+      distanceByMonthChart = new Chart context,
+        type: 'horizontalBar'
+        data: data
+        options:
+          maintainAspectRation: true
+
+    _activitiesMonthYears: ->
+      monthYears = _.map @activitiesData(), (data) ->
         moment(data.start_date).format('MMMM YYYY')
-      activityMonthYears = _.uniq activityMonths
-      @distanceSummary = {}
-      @activitiesData().forEach (item) =>
-        itemMonthYear =  moment(item.start_date).format 'MMMM YYYY'
-        @distanceSummary[itemMonthYear] ||= 0
-        if _.includes(activityMonthYears, itemMonthYear)
-          @distanceSummary[itemMonthYear] += item.distance
-      debugger
+      _.uniq monthYears
 
-    #_loadMonthDistanceBarChart: ->
+    _totalDistanceByMonth: ->
+      totalDistanceByMonth = {}
+      @activitiesData().forEach (item) =>
+        itemMonthYear = moment(item.start_date).format 'MMMM YYYY'
+        totalDistanceByMonth[itemMonthYear] ||= 0
+        if _.includes(@activitiesMonthYears(), itemMonthYear)
+          totalDistanceByMonth[itemMonthYear] += item.distance / 1000
+      _.map totalDistanceByMonth, (item) -> item.toFixed(1)
 
     _formatSpeed: (speed) ->
       speed = speed * 3600 / 1000
