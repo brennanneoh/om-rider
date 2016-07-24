@@ -1,6 +1,10 @@
 #map {
   height: 350px; }
 
+#distance-by-month {
+  width: 100%;
+  height: 200px; }
+
 #activities {
   font-size: 0.8em; }
 

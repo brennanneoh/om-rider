@@ -9,6 +9,7 @@
       'mapbox-gl': 'https://api.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl',
       moment: 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min',
       chartjs: 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.6/Chart.min',
+      randomcolor: 'https://cdnjs.cloudflare.com/ajax/libs/randomcolor/0.4.4/randomColor.min',
       viewModel: 'view-model'
     }
   });

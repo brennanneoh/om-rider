@@ -1,5 +1,5 @@
 (function() {
-  define('viewModel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'knockout-paging'], function($, ko, _, moment, mapboxgl) {
+  define('viewModel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'chartjs', 'randomcolor', 'knockout-paging'], function($, ko, _, moment, mapboxgl, Chart, randomColor) {
     var viewModel;
     return viewModel = (function() {
       function viewModel() {
@@ -9,8 +9,22 @@
             pageSize: 15
           }
         });
-        this._loadData();
-        this._loadMap();
+        this.totalDistanceGroupedByMonth = ko.pureComputed((function(_this) {
+          return function() {
+            return _this._totalDistanceByMonth();
+          };
+        })(this));
+        this.activitiesMonthYears = ko.pureComputed((function(_this) {
+          return function() {
+            return _this._activitiesMonthYears();
+          };
+        })(this));
+        this._loadData().then((function(_this) {
+          return function() {
+            _this._loadMap();
+            return _this._loadDistanceByMonthBarChart();
+          };
+        })(this));
       }
 
       viewModel.prototype._loadMap = function() {
@@ -61,7 +75,7 @@
       viewModel.prototype._loadData = function() {
         var json;
         json = $.ajax('js/activities.json');
-        return json.done((function(_this) {
+        return json.then((function(_this) {
           return function(data) {
             var distance, i, item, len;
             for (i = 0, len = data.length; i < len; i++) {
@@ -75,33 +89,64 @@
               item.max_speed = _this._formatSpeed(item.max_speed);
             }
             data = _.orderBy(data, ['start_date', 'start_date_local'], ['desc', 'desc']);
-            data = _.filter(data, function(item) {
+            return _this.activitiesData(_.filter(data, function(item) {
               return _.includes([1, 2, 3, 4, 5], moment(item.start_date_local).isoWeekday());
-            });
-            _this.activitiesData(data);
-            return _this._loadMonthDistanceSummary();
+            }));
           };
         })(this));
       };
 
-      viewModel.prototype._loadMonthDistanceSummary = function() {
-        var activityMonthYears, activityMonths;
-        activityMonths = _.map(this.activitiesData(), function(data) {
+      viewModel.prototype._loadDistanceByMonthBarChart = function() {
+        var backgroundColor, context, data, distanceByMonthChart, distanceData, labels;
+        backgroundColor = _.times(_.size(this.totalDistanceGroupedByMonth()), function() {
+          return randomColor();
+        });
+        distanceData = _.values(this.totalDistanceGroupedByMonth());
+        labels = this.activitiesMonthYears();
+        data = {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Total',
+              backgroundColor: backgroundColor,
+              data: distanceData
+            }
+          ]
+        };
+        context = $('#distance-by-month');
+        return distanceByMonthChart = new Chart(context, {
+          type: 'horizontalBar',
+          data: data,
+          options: {
+            maintainAspectRation: true
+          }
+        });
+      };
+
+      viewModel.prototype._activitiesMonthYears = function() {
+        var monthYears;
+        monthYears = _.map(this.activitiesData(), function(data) {
           return moment(data.start_date).format('MMMM YYYY');
         });
-        activityMonthYears = _.uniq(activityMonths);
-        this.distanceSummary = {};
+        return _.uniq(monthYears);
+      };
+
+      viewModel.prototype._totalDistanceByMonth = function() {
+        var totalDistanceByMonth;
+        totalDistanceByMonth = {};
         this.activitiesData().forEach((function(_this) {
           return function(item) {
-            var base, itemMonthYear;
+            var itemMonthYear;
             itemMonthYear = moment(item.start_date).format('MMMM YYYY');
-            (base = _this.distanceSummary)[itemMonthYear] || (base[itemMonthYear] = 0);
-            if (_.includes(activityMonthYears, itemMonthYear)) {
-              return _this.distanceSummary[itemMonthYear] += item.distance;
+            totalDistanceByMonth[itemMonthYear] || (totalDistanceByMonth[itemMonthYear] = 0);
+            if (_.includes(_this.activitiesMonthYears(), itemMonthYear)) {
+              return totalDistanceByMonth[itemMonthYear] += item.distance / 1000;
             }
           };
         })(this));
-        debugger;
+        return _.map(totalDistanceByMonth, function(item) {
+          return item.toFixed(1);
+        });
       };
 
       viewModel.prototype._formatSpeed = function(speed) {
