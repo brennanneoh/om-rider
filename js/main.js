@@ -6,6 +6,7 @@
       knockout: 'https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min',
       lodash: 'https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.13.1/lodash.min',
       moment: 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min',
+      'knockout-paging': 'https://cdnjs.cloudflare.com/ajax/libs/knockout-paging/0.3.2/knockout-paging.min',
       viewModel: 'view-model'
     }
   });
