@@ -1,5 +1,5 @@
-define 'viewModel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'chartjs', 'randomcolor', 'knockout-paging'], ($, ko, _, moment, mapboxgl, Chart, randomColor) ->
-  class viewModel
+define 'viewmodel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'chartjs', 'randomcolor', 'knockout-paging'], ($, ko, _, moment, mapboxgl, Chart, randomColor) ->
+  class ViewModel
     constructor: () ->
       @activitiesData = ko.observableArray()
       @activitiesData.extend
@@ -76,7 +76,7 @@ define 'viewModel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'cha
         type: 'horizontalBar'
         data: data
         options:
-          maintainAspectRation: true
+          maintainAspectRatio: true
 
     _activitiesMonthYears: ->
       monthYears = _.map @activitiesData(), (data) ->

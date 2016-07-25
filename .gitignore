@@ -19,3 +19,4 @@ jspm_packages
 .sass-cache
 build
 data/*.json
+spec/*
