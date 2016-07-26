@@ -75,8 +75,6 @@ define 'viewmodel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'cha
       distanceByMonthChart = new Chart context,
         type: 'horizontalBar'
         data: data
-        options:
-          maintainAspectRatio: true
 
     _activitiesMonthYears: ->
       monthYears = _.map @activitiesData(), (data) ->
