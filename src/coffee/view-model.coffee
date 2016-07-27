@@ -1,5 +1,6 @@
 define 'viewmodel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'chartjs', 'randomcolor', 'knockout-paging'], ($, ko, _, moment, mapboxgl, Chart, randomColor) ->
   class ViewModel
+    MAPBOX_ACCESS_TOKEN: 'pk.eyJ1IjoiYnJlbm5hbm5lb2giLCJhIjoiY2lyMDRjaXZrMDJweWZwbWd5d3JrNmR0MSJ9.Cek0zIm8OfVVY2pnyiRqVw'
     constructor: () ->
       @activitiesData = ko.observableArray()
       @activitiesData.extend
@@ -8,39 +9,45 @@ define 'viewmodel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'cha
       @totalDistanceGroupedByMonth = ko.pureComputed => @_totalDistanceByMonth()
       @activitiesMonthYears = ko.pureComputed => @_activitiesMonthYears()
 
+      @map = undefined
+
       @_loadData().then =>
         @_loadMap()
         @_loadDistanceByMonthBarChart()
 
     _loadMap: ->
-      mapboxgl.accessToken = 'pk.eyJ1IjoiYnJlbm5hbm5lb2giLCJhIjoiY2lyMDRjaXZrMDJweWZwbWd5d3JrNmR0MSJ9.Cek0zIm8OfVVY2pnyiRqVw'
-      map = new mapboxgl.Map
+      mapboxgl.accessToken = @MAPBOX_ACCESS_TOKEN
+      @map = new mapboxgl.Map
         container: 'map'
         style: 'mapbox://styles/mapbox/streets-v9'
         center: [103.7775, 1.3484]
         zoom: 12
-      map.on 'load', =>
-        data = @activitiesData()
-        [0..4].forEach (index) ->
-          item = data[index]
-          map.addSource "route-#{item.id}",
-            type: 'geojson'
-            data:
-              type: 'Feature'
-              properties: {}
-              geometry:
-                type: 'LineString'
-                coordinates: item.summary_coordinates
-          map.addLayer
-            id: "route-#{item.id}"
-            type: 'line'
-            source: "route-#{item.id}"
-            layout:
-              'line-join': 'round'
-              'line-cap': 'round'
-            paint:
-              'line-color': item.line_color
-              'line-width': 5
+      @map.on 'load', =>
+        @_loadMapData()
+
+    _loadMapData: ->
+      data = @activitiesData()
+      datumLimit = if data.length > 5 then 4 else data.length - 1
+      [0..datumLimit].forEach (index) =>
+        item = data[index]
+        @map.addSource "route-#{item.id}",
+          type: 'geojson'
+          data:
+            type: 'Feature'
+            properties: {}
+            geometry:
+              type: 'LineString'
+              coordinates: item.summary_coordinates
+        @map.addLayer
+          id: "route-#{item.id}"
+          type: 'line'
+          source: "route-#{item.id}"
+          layout:
+            'line-join': 'round'
+            'line-cap': 'round'
+          paint:
+            'line-color': item.line_color
+            'line-width': 5
 
     _loadData: ->
       json = $.ajax 'js/activities.json'
