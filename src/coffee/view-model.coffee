@@ -5,13 +5,15 @@ define 'viewmodel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'cha
       @activitiesData = ko.observableArray()
       @activitiesData.extend
         paged:
-          pageSize: 15
+          pageSize: 5
       @totalDistanceGroupedByMonth = ko.pureComputed => @_totalDistanceByMonth()
       @activitiesMonthYears = ko.pureComputed => @_activitiesMonthYears()
+      @totalDistanceByCyclistAndMonth = ko.pureComputed => @_totalDistanceByCyclistAndMonth()
 
       @map = undefined
 
       @_loadData().then =>
+        @_totalDistanceByCyclistAndMonth()
         @_loadMap()
         @_loadDistanceByMonthBarChart()
 
@@ -66,18 +68,28 @@ define 'viewmodel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'cha
           _.includes [1..5], moment(item.start_date_local).isoWeekday()
 
     _loadDistanceByMonthBarChart: ->
-      backgroundColor = _.times _.size(@totalDistanceGroupedByMonth()), () -> randomColor()
       distanceData = _.values @totalDistanceGroupedByMonth()
+      cyclists = ['brennanneoh', 'ranhiru']
+      distanceByCyclistMonth = @totalDistanceByCyclistAndMonth()
+      datasets = []
+      cyclists.forEach (cyclist) =>
+        cyclistDistanceData = []
+        @activitiesMonthYears().forEach (monthYear) =>
+          cyclistDistanceData.push distanceByCyclistMonth[monthYear][cyclist]
+        data =
+          label: cyclist
+          backgroundColor: randomColor()
+          data: cyclistDistanceData
+        datasets.push(data)
+      datasets.push
+        label: 'Total'
+        backgroundColor: randomColor()
+        data: distanceData
+      debugger
       labels = @activitiesMonthYears()
       data =
         labels: labels
-        datasets: [
-          {
-            label: 'Total'
-            backgroundColor: backgroundColor
-            data: distanceData
-          }
-        ]
+        datasets: datasets
       context = $('#distance-by-month')
       distanceByMonthChart = new Chart context,
         type: 'horizontalBar'
@@ -96,6 +108,22 @@ define 'viewmodel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'cha
         if _.includes(@activitiesMonthYears(), itemMonthYear)
           totalDistanceByMonth[itemMonthYear] += item.distance / 1000
       _.map totalDistanceByMonth, (item) -> item.toFixed(1)
+
+    _totalDistanceByCyclistAndMonth: ->
+      totalDistanceByCyclistAndMonth = {}
+      @activitiesMonthYears().forEach (monthYear) =>
+        totalDistanceByCyclistAndMonth[monthYear] ||= {}
+        ['brennanneoh', 'ranhiru'].forEach (cyclist) =>
+          cyclistData = _.filter @activitiesData(), (data) =>
+            data.athlete.username is cyclist
+          totalDistanceByCyclistAndMonth[monthYear][cyclist] ||= 0
+          cyclistData.forEach (item) =>
+            itemMonthYear = moment(item.start_date).format 'MMMM YYYY'
+            if monthYear is itemMonthYear
+              distance = item.distance / 1000
+              totalDistanceByCyclistAndMonth[monthYear][cyclist] += distance
+          totalDistanceByCyclistAndMonth[monthYear][cyclist] = totalDistanceByCyclistAndMonth[monthYear][cyclist].toFixed(1)
+      totalDistanceByCyclistAndMonth
 
     _formatSpeed: (speed) ->
       speed = speed * 3600 / 1000
