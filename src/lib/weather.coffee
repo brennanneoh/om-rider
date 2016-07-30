@@ -3,7 +3,6 @@ moment = require 'moment'
 require 'moment-range'
 request = require 'request'
 fs = require 'fs'
-iconv = require 'iconv-lite'
 
 weatherStations =
   clementi:
@@ -14,6 +13,10 @@ weatherStations =
     code: 'S114'
   bukit_panjang:
     code: 'S64'
+  botanic_gardens:
+    code: 'S120'
+  bukit_timah:
+    code: 'S90'
 
 startYearMonth = moment '2016-04-01', 'YYYY-MM-DD'
 endYearMonth = moment().subtract(1, 'months').format 'YYYY-MM-DD'
@@ -33,8 +36,4 @@ for csvFile of weatherCsvFiles
   writeStream = fs.createWriteStream csvFile, { encoding: 'binary' }
   readStream = request.get weatherCsvFiles[csvFile]
   console.log "Writing file #{csvFile}"
-  readStream.pipe iconv.decodeStream('iso-8859-1')
   readStream.pipe writeStream
-# writeStream = fs.createWriteStream 'weather.csv'
-# request = request.get 'http://www.weather.gov.sg/files/dailydata/DAILYDATA_S50_201604.csv'
-# request.pipe writeStream
