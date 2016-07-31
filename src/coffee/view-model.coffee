@@ -86,13 +86,13 @@ define 'viewmodel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'cha
 
     _loadMapData: ->
       data = _.orderBy @activitiesData(), ['start_date_local'], ['desc']
+      points = []
       [0, 1].forEach (index) =>
         item = data[index]
         @map.addSource "route-#{item.id}",
           type: 'geojson'
           data:
             type: 'Feature'
-            properties: {}
             geometry:
               type: 'LineString'
               coordinates: item.summary_coordinates
@@ -104,8 +104,39 @@ define 'viewmodel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'cha
             'line-join': 'round'
             'line-cap': 'round'
           paint:
-            'line-color': item.line_color
-            'line-width': 5
+            'line-color': randomColor()
+            'line-width': 3
+        @map.addSource "point-#{item.id}",
+          type: 'geojson'
+          data:
+            type: 'Feature'
+            geometry:
+              type: 'Point'
+              coordinates: item.summary_coordinates[0]
+        @map.addLayer
+          id: "point-#{item.id}"
+          type: 'symbol'
+          source: "point-#{item.id}"
+          layout:
+            'icon-image': 'bicycle-15'
+        points.push { id: "point-#{item.id}", coordinates: item.summary_coordinates }
+      @_animatePoints(points)
+
+    _animatePoints: (points) ->
+      points.forEach (point) =>
+        counter = 0
+        animatePoint = setInterval () =>
+          mapPoint =
+            type: 'Feature'
+            geometry:
+              type: 'Point'
+              coordinates: point.coordinates[counter]
+          @map.getSource(point.id).setData mapPoint
+          if counter is (point.coordinates.length - 1)
+            clearInterval animatePoint
+          else
+            counter++
+        , 1000
 
     _loadData: ->
       json = $.ajax 'js/activities.json'
