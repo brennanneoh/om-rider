@@ -48,7 +48,7 @@ define 'viewmodel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'cha
       rainfallData
 
     _loadThisWeekData: ->
-      data = _.orderBy @activitiesData(), ['start_date', 'start_date_local'], ['desc', 'desc']
+      data = _.orderBy @activitiesData(), ['start_date_local'], ['desc']
       latestDate = data[0].start_date
       mondayOfLatestWeek = moment(latestDate).startOf 'isoWeek'
       @mondayOfLatestWeek mondayOfLatestWeek.format('MMMM Do')
@@ -85,9 +85,8 @@ define 'viewmodel', ['jquery', 'knockout', 'lodash', 'moment', 'mapbox-gl', 'cha
         @_loadMapData()
 
     _loadMapData: ->
-      data = @activitiesData()
-      datumLimit = if data.length > 5 then 4 else data.length - 1
-      [0..datumLimit].forEach (index) =>
+      data = _.orderBy @activitiesData(), ['start_date_local'], ['desc']
+      [0, 1].forEach (index) =>
         item = data[index]
         @map.addSource "route-#{item.id}",
           type: 'geojson'
