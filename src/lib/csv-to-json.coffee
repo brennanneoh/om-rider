@@ -9,9 +9,11 @@ fs.readdir 'data', (err, files) ->
   csvFiles.forEach (file) ->
     monthData = []
     readStream = fs.createReadStream "data/#{file}"
+    console.log "Reading from #{file}"
     csv.fromStream readStream, { headers: true }
        .on 'data', (datum) ->
          datum = _.pick datum, [
+           'Station'
            'Year'
            'Month'
            'Day'
@@ -25,4 +27,5 @@ fs.readdir 'data', (err, files) ->
          stationMonthData.push monthData
          if stationMonthData.length is csvFiles.length
            stationMonthData = _.flatten stationMonthData
+           console.log 'Writing JSON file'
            jsonfile.writeFile 'build/js/weather.json', stationMonthData

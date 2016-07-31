@@ -6,6 +6,7 @@ require.config
     lodash: '//cdnjs.cloudflare.com/ajax/libs/lodash.js/4.13.1/lodash.min'
     'mapbox-gl': '//api.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl'
     moment: '//cdnjs.cloudflare.com/ajax/libs/moment.js/2.14.1/moment.min'
-    chartjs: '//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.6/Chart.min'
+    'moment-range': '//cdnjs.cloudflare.com/ajax/libs/moment-range/2.2.0/moment-range.min'
+    chartjs: '//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.0/Chart.min'
     randomcolor: '//cdnjs.cloudflare.com/ajax/libs/randomcolor/0.4.4/randomColor.min'
     viewmodel: 'view-model'

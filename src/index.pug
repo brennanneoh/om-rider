@@ -5,48 +5,42 @@ html
     link(rel='stylesheet', href='//api.mapbox.com/mapbox-gl-js/v0.21.0/mapbox-gl.css')
     link(rel='stylesheet', href='css/main.css')
   body
-    .container-fluid
+    .container
       .header
-        h1 OpsManager Rider
+        h1 	OpsManager Rider
+    .row
+      .col-md-12
+        #map
+    .container
       .row
-        .col-md-12
-          #map
-      .row
-        .col-md-8
-          .h2 Distance by Month
+        .col-md-6
+          .h2 Distance
           canvas#distance-by-month
+        .col-md-6
+          .h2
+            // ko text: thisWeekTitle
+            // /ko
           table#activities.table.table-striped
             thead.thead-inverse
               th
                 .sr-only Profile Picture
               th Cyclist
-              th Date
-              th Time
+              th Start Time
               th Distance
               th Average Speed
               th Maximum Speed
-            tbody(data-bind='foreach: activitiesData.pageItems')
+            tbody(data-bind="foreach: { data: thisWeekData, as: 'weekData' }")
+              tr
+                td(data-bind='text: weekData.date' colspan='7')
+              // ko foreach: { data: activities, as: 'item' }
               tr
                 td
-                  img(data-bind='attr: { src: avatar_url }')
-                td(data-bind='text: athlete.username')
-                td(data-bind='text: date')
-                td(data-bind='text: time')
-                td(data-bind='text: distance_kilometer')
-                td(data-bind='text: average_speed')
-                td(data-bind='text: max_speed')
-          ul.pagination
-            li.page-item
-              a.page-link(href='#' aria-label='Previous' data-bind='click: activitiesData.toPreviousPage()')
-                span(aria-hidden=true) &laquo;
-                .sr-only Previous
-            // ko foreach: activitiesData.pages
-            li.page-item(data-bind='css: { active: $data == $root.activitiesData.pageNumber() }')
-              a.page-link(href='#' data-bind='text: $data, click: $parent.activitiesData.pageNumber')
-            // /ko
-            li.page-item
-              a.page-link(href='#' aria-label='Next' data-bind='click: activitiesData.toNextPage()')
-                span(aria-hidden=true) &raquo;
-                .sr-only Next
+                  img(data-bind='attr: { src: item.avatar_url }')
+                td(data-bind='text: item.athlete.username')
+                td(data-bind='text: item.time')
+                td(data-bind='text: item.distance_kilometer')
+                td(data-bind='text: item.average_speed')
+                td(data-bind='text: item.max_speed')
+              // /ko
 
   script(data-main='js/main' src='//cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.js')
