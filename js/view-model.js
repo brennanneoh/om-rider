@@ -143,9 +143,10 @@
       };
 
       ViewModel.prototype._loadMapData = function() {
-        var data;
+        var data, points;
         data = _.orderBy(this.activitiesData(), ['start_date_local'], ['desc']);
-        return [0, 1].forEach((function(_this) {
+        points = [];
+        [0, 1].forEach((function(_this) {
           return function(index) {
             var item;
             item = data[index];
@@ -153,14 +154,13 @@
               type: 'geojson',
               data: {
                 type: 'Feature',
-                properties: {},
                 geometry: {
                   type: 'LineString',
                   coordinates: item.summary_coordinates
                 }
               }
             });
-            return _this.map.addLayer({
+            _this.map.addLayer({
               id: "route-" + item.id,
               type: 'line',
               source: "route-" + item.id,
@@ -169,10 +169,58 @@
                 'line-cap': 'round'
               },
               paint: {
-                'line-color': item.line_color,
-                'line-width': 5
+                'line-color': randomColor(),
+                'line-width': 3
               }
             });
+            _this.map.addSource("point-" + item.id, {
+              type: 'geojson',
+              data: {
+                type: 'Feature',
+                geometry: {
+                  type: 'Point',
+                  coordinates: item.summary_coordinates[0]
+                }
+              }
+            });
+            _this.map.addLayer({
+              id: "point-" + item.id,
+              type: 'symbol',
+              source: "point-" + item.id,
+              layout: {
+                'icon-image': 'bicycle-15'
+              }
+            });
+            return points.push({
+              id: "point-" + item.id,
+              coordinates: item.summary_coordinates
+            });
+          };
+        })(this));
+        return this._animatePoints(points);
+      };
+
+      ViewModel.prototype._animatePoints = function(points) {
+        return points.forEach((function(_this) {
+          return function(point) {
+            var animatePoint, counter;
+            counter = 0;
+            return animatePoint = setInterval(function() {
+              var mapPoint;
+              mapPoint = {
+                type: 'Feature',
+                geometry: {
+                  type: 'Point',
+                  coordinates: point.coordinates[counter]
+                }
+              };
+              _this.map.getSource(point.id).setData(mapPoint);
+              if (counter === (point.coordinates.length - 1)) {
+                return clearInterval(animatePoint);
+              } else {
+                return counter++;
+              }
+            }, 1000);
           };
         })(this));
       };
